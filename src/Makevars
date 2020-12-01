@@ -1,0 +1,2 @@
+PKG_LIBS = `pkg-config --libs Qt5Qml Qt5Quick`
+PKG_CXXFLAGS = `pkg-config --cflags Qt5Qml Qt5Quick`

@@ -2,8 +2,14 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+#include <QQmlEngine>
+#include <QQuickRenderControl>
+
 // [[Rcpp::export]]
-List rcpp_hello_world() {
+List runQml() 
+{
+
+	QQuickRenderControl renderControl();
 
     CharacterVector x = CharacterVector::create( "foo", "bar" )  ;
     NumericVector y   = NumericVector::create( 0.0, 1.0 ) ;
