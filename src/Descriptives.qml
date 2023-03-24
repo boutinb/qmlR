@@ -16,17 +16,16 @@
 // <http://www.gnu.org/licenses/>.
 //
 
-import QtQuick			2.8
-import QtQuick.Layouts	1.3
-import JASP.Controls	1.0
-import JASP				1.0
+import QtQuick
+import JASP.Controls
 
 // All Analysis forms must be built with the From QML item
 Form
 {
 	columns: 1
+	info: qsTr("This is the Descriptive analysis....")
 
-	Formula
+	FormulaBase
 	{
 		rhs: "variables"
 	}
@@ -39,6 +38,7 @@ Form
 
 	CheckBox
 	{
+		info: qsTr("transpose...")
 		name	: "transposeMainTable"
 		label	: qsTr("Transpose descriptives table")
 		checked	: false
@@ -113,7 +113,6 @@ Form
 		{
 			title:				qsTr("Dispersion")
 			columns:			2
-			Layout.columnSpan:	2
 
 			CheckBox { name: "standardErrorMean";	label: qsTr("S.E. mean")							}
 			CheckBox { name: "standardDeviation";	label: qsTr("Std. deviation");		checked: true	}

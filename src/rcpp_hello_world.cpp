@@ -5,122 +5,156 @@ using namespace Rcpp;
 #include <QCoreApplication>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include "utilities/qutils.h"
-#include "utilities/qmlutils.h"
 #include <iostream>
-#include "jasptheme.h"
 #include <QQmlContext>
 #include <QThread>
 #include <QFileInfo>
 #include <QAbstractEventDispatcher>
-#include "controls/checkboxbase.h"
-#include "analysisform.h"
-#include "controls/sliderbase.h"
-#include "controls/textareabase.h"
-#include "controls/textinputbase.h"
-#include "controls/radiobuttonbase.h"
-#include "controls/radiobuttonsgroupbase.h"
-#include "controls/componentslistbase.h"
-#include "controls/factorsformbase.h"
-#include "controls/inputlistbase.h"
-#include "controls/factorlevellistbase.h"
-#include "controls/comboboxbase.h"
-#include "controls/variablesformbase.h"
-#include "controls/tableviewbase.h"
-#include "controls/jaspdoublevalidator.h"
-#include "controls/expanderbuttonbase.h"
-#include "controls/variableslistbase.h"
-#include "rsyntax/formulabase.h"
+#include <QQmlComponent>
+#include <QQuickItem>
+#include <QDir>
+
+#include <filesystem>
 
 static bool initialized = false;
 static QGuiApplication* application = nullptr;
 static QQmlApplicationEngine* engine = nullptr;
+static const std::string SOURCE_FOLDER= "/Users/brunoboutin/JASP/source/qmlR/";
 
-void init()
+void printFolder(StringVector& output, const QDir& dir, int depth = 0)
+{
+	for (QFileInfo info : dir.entryInfoList())
+	{
+		QString text = QString("Niveau %1: ").arg(depth);
+		text += info.baseName() + ", " + info.absoluteFilePath() + ", " + info.canonicalFilePath() + ": " + (info.isDir() ? "Folder" : (info.isFile() ? "file" : "???"));
+		output.push_back(text.toStdString());
+		if (info.isDir() && info.baseName() != "qt-project")
+		{
+			QDir dir2(info.absoluteFilePath());
+			printFolder(output, dir2, depth + 1);
+		}
+		else if (info.baseName() == "qmldir")
+		{
+			QFile inputFile(info.absoluteFilePath());
+			if (inputFile.open(QIODevice::ReadOnly))
+			{
+			   QTextStream in(&inputFile);
+			   while (!in.atEnd())
+				  output.push_back(in.readLine().toStdString());
+			   inputFile.close();
+			}
+		}
+
+	}
+
+}
+
+String getEnv(const std::string& name)
+{
+	Function f("Sys.getenv('" + name + "')");
+
+	return f();
+}
+
+void init(StringVector& output)
 {
 	if (initialized) return;
 	initialized = true;
-	Q_INIT_RESOURCE(qmlComponents);
 
-	int		argc = 2;
+	QString rHome = qgetenv("R_HOME");
+	QString qmlRFolder = rHome + "/library/qmlR";
+	output.push_back("R_HOME: " + qgetenv("R_HOME").toStdString());
+
+	QCoreApplication::addLibraryPath(qmlRFolder + "/plugins");
+
+	int					dummyArgc = 1;
+	char				dummyArgv[2];
+	dummyArgv[0] = '?';
+	dummyArgv[1] = '\0';
+
+	const char* qmlR = SOURCE_FOLDER.c_str();
 	const char*	platformArg = "-platform";
-	const char*	platformOpt = "offscreen";
-	char * argv[] = {const_cast<char*>(platformArg), const_cast<char*>(platformOpt)};
+	const char*	platformOpt = "cocoa";
 
-	application = new QGuiApplication(argc, argv);
+	std::vector<const char*> arguments = {qmlR, platformArg, platformOpt};
+
+	int		argc = arguments.size();
+	char** argvs = new char*[argc];
+
+	for (int i = 0; i < argc; i++)
+	{
+		argvs[i] = new char[strlen(arguments[i]) + 1];
+		memset(argvs[i], '\0',				strlen(arguments[i]) + 1);
+		memcpy(argvs[i], arguments[i],		strlen(arguments[i]));
+		argvs[i][							strlen(arguments[i])] = '\0';
+	}
+
+
+	qputenv("QT_QPA_PLATFORM", "cocoa");
+	//qputenv("QT_QPA_PLATFORM_PLUGIN_PATH", platformFolder.toStdString().c_str());
+	char			*	dummyArgvP = dummyArgv;
+	application = new QGuiApplication(argc, argvs);
 	engine = new QQmlApplicationEngine();
 
-	qmlRegisterUncreatableType<JASPControl>						("JASP",		1, 0 ,"JASP",				"Impossible to create JASP Object"	); //This is here to keep JASP.enum short I guess?
-	qmlRegisterType<JaspTheme>									("JASP",		1, 0, "JaspTheme"										);
-	qmlRegisterType<AnalysisForm>								("JASP",		1, 0, "AnalysisForm"					);
-	qmlRegisterType<JASPControl>								("JASP",		1, 0, "JASPControl"						);
-	qmlRegisterType<ExpanderButtonBase>							("JASP",		1, 0, "ExpanderButtonBase"				);
-	qmlRegisterType<CheckBoxBase>								("JASP",		1, 0, "CheckBoxBase"					);
-	qmlRegisterType<SliderBase>									("JASP",		1, 0, "SliderBase"						);
-	qmlRegisterType<TextInputBase>								("JASP",		1, 0, "TextInputBase"					);
-	qmlRegisterType<TextAreaBase>								("JASP",		1, 0, "TextAreaBase"					);
-	qmlRegisterType<ComboBoxBase>								("JASP",		1, 0, "ComboBoxBase"					);
-	qmlRegisterType<RadioButtonBase>							("JASP",		1, 0, "RadioButtonBase"					);
-	qmlRegisterType<RadioButtonsGroupBase>						("JASP",		1, 0, "RadioButtonsGroupBase"			);
-	qmlRegisterType<ComponentsListBase>							("JASP",		1, 0, "ComponentsListBase"				);
-	qmlRegisterType<FactorsFormBase>							("JASP",		1, 0, "FactorsFormBase"					);
-	qmlRegisterType<InputListBase>								("JASP",		1, 0, "InputListBase"					);
-	qmlRegisterType<FactorLevelListBase>						("JASP",		1, 0, "FactorLevelListBase"				);
-	qmlRegisterType<VariablesListBase>							("JASP",		1, 0, "VariablesListBase"				);
-	qmlRegisterType<VariablesFormBase>							("JASP",		1, 0, "VariablesFormBase"				);
-	qmlRegisterType<TableViewBase>								("JASP",		1, 0, "TableViewBase"					);
-	qmlRegisterType<JASPDoubleValidator>						("JASP",		1, 0, "JASPDoubleValidator"				);
-	qmlRegisterType<FormulaBase>								("JASP",		1, 0, "Formula"							);
 
-	PreferencesModelBase* preferences = new PreferencesModelBase();
+	//new MessageForwarder(this); //We do not need to store this
 
-	engine->rootContext()->setContextProperty("preferencesModel",		preferences						);
-	bool	debug	= false,
-			isMac	= false,
-			isLinux = false;
+	//qmlRegisterUncreatableType<JASPControl>						("JASP",		1, 0 ,"JASP",				"Impossible to create JASP Object"	); //This is here to keep JASP.enum short I guess?
+	//qmlRegisterUncreatableType<MessageForwarder>				("JASP",		1, 0, "MessageForwarder",	"You can't touch this"				);
 
-#ifdef JASP_DEBUG
-	debug = true;
-#endif
+	//qmlRegisterType<JaspTheme>									("JASP",		1, 0, "JaspTheme"						);
+	//ALTNavigation::registerQMLTypes("JASP");
 
-#ifdef __APPLE__
-	isMac = true;
-#endif
+	//PreferencesModelBase* preferences = new PreferencesModelBase();
 
-#ifdef __linux__
-	isLinux = true;
-#endif
+	//engine->rootContext()->setContextProperty("preferencesModel",		preferences						);
 
-	bool isWindows = !isMac && !isLinux;
+	engine->addImportPath("/Users/brunoboutin/Qt/6.4.2/macos/qml");
+	//engine->addImportPath("/Users/brunoboutin/JASP/source/build-testPlugin-Qt_6_4_2_for_macOS-Debug");
+	engine->addImportPath("/Users/brunoboutin/JASP/source/build-jaspQMLComponents-Qt_6_4_2_for_macOS-Debug/components");
 
-	engine->rootContext()->setContextProperty("DEBUG_MODE",			debug);
-	engine->rootContext()->setContextProperty("MACOS",				isMac);
-	engine->rootContext()->setContextProperty("LINUX",				isLinux);
-	engine->rootContext()->setContextProperty("WINDOWS",				isWindows);
-	engine->rootContext()->setContextProperty("INTERACTION_SEPARATOR", Term::separator);
-
-	engine->addImportPath("qrc:///components");
-
-	QQmlComponent	qmlComp2( engine, "qrc:///components/JASP/Theme/Theme.qml", QQmlComponent::PreferSynchronous);
-	qmlComp2.create();
+	//QQmlComponent	qmlComp2( engine, "qrc:///components/JASP/Theme/Theme.qml", QQmlComponent::PreferSynchronous);
+	//qmlComp2.create();
 
 	//engine.load(QUrl("qrc:///components/JASP/Theme/Theme.qml"));
 
-	engine->rootContext()->setContextProperty("jaspTheme",			JaspTheme::currentTheme()		);
-	application->processEvents();
+	//engine->rootContext()->setContextProperty("jaspTheme",			JaspTheme::currentTheme()		);
+	//application->processEvents();
+
+
+	output.push_back("Base URL: " + engine->baseUrl().toDisplayString().toStdString());
+	output.push_back("Current Path: " + std::filesystem::current_path().string());
+
+	QStringList paths = engine->importPathList();
+	for (QString path : paths)
+		output.push_back("Import path: " + path.toStdString());
+	QStringList pluginPaths = engine->pluginPathList();
+	for (QString path : pluginPaths)
+		output.push_back("Plugin path: " + path.toStdString());
+
+	QDir dir(":/");
+
+	printFolder(output, dir);
+
 
 }
 
 // [[Rcpp::export]]
-StringVector runQml(String qmlFilePath)
+
+
+StringVector runQml(String qmlFileName, String options)
 {
-	init();
-
 	StringVector output;
-	output.push_back("START");
 
+	init(output);
+	engine->clearComponentCache();
 
-	QFileInfo			qmlFile(QString::fromStdString("/Users/brunoboutin/JASP/source/qmlR/src/Descriptives.qml"));
+	std::string qmlFileNameStr = qmlFileName.get_cstring();
+	std::string optionsStr = options.get_cstring();
+
+	output.push_back("File: " + qmlFileNameStr);
+
+	QFileInfo			qmlFile(QString::fromStdString(SOURCE_FOLDER + "/src/" + qmlFileNameStr + ".qml"));
 	QString				qmlBaseName(qmlFile.baseName());
 	if (!qmlFile.exists())
 	{
@@ -133,40 +167,26 @@ StringVector runQml(String qmlFilePath)
 	QUrl urlFile = QUrl::fromLocalFile(qmlFile.absoluteFilePath());
 	QQmlComponent	qmlComp( engine, urlFile, QQmlComponent::PreferSynchronous);
 
-	AnalysisForm* form = qobject_cast<AnalysisForm*>(qmlComp.create());
+	QQuickItem* item = qobject_cast<QQuickItem*>(qmlComp.create());
 
 	for(const auto & error : qmlComp.errors())
-		output.push_back("Error when cerating component at " + std::to_string(error.line()) + "," + std::to_string(error.column()) + ": " + error.description().toStdString());
+		output.push_back("Error when creating component at " + std::to_string(error.line()) + "," + std::to_string(error.column()) + ": " + error.description().toStdString());
 
-	if (!form)
+	if (!item)
 	{
-		output.push_back("Form not created");
+		output.push_back("Item not created");
 		return output;
 	}
 
-	output.push_back("Form created");
-	Json::Value options(Json::objectValue);
-
-	options["formula"] = "~ one + two";
-
-	output.push_back("options: " + options.toStyledString() );
+	output.push_back("Item created!!!!");
 
 	application->processEvents();
-	AnalysisBase* analysis = new AnalysisBase();
-	form->setAnalysis(analysis);
-	output.push_back("Start parsing");
-	if (form->parseOptions(options))
-		output.push_back("Option parsed: " + options.toStyledString() );
-	else
-	{
-		output.push_back("Error!" );
-		QString error;
-		if (!form->hasError()) error = form->getError();
-		output.push_back("Problem when parsing options: " + error.toStdString() );
-	}
 
-	form->setAnalysis(nullptr);
-	delete form;
+	QString returnedValue;
+	QMetaObject::invokeMethod(item, "parseOptions",
+		Q_RETURN_ARG(QString, returnedValue),
+		Q_ARG(QString, QString::fromStdString(optionsStr)));
+	output.push_back("OPTIONS: " + returnedValue.toStdString());
 
 	return output;
 }

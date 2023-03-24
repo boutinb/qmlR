@@ -1,28 +1,32 @@
-PKG_LIBS = \
-    /Users/brunoboutin/JASP/source/build-jasp-desktop2-Qt_6_2_4_for_macOS-Debug/QMLComponents/libQMLComponents.a \
-    /Users/brunoboutin/JASP/source/build-jasp-desktop2-Qt_6_2_4_for_macOS-Debug/QMLComponents/CMakeFiles/QMLComponents_resources_1.dir/.rcc/qrc_qmlcomponents.cpp.o \
-    /Users/brunoboutin/JASP/source/build-jasp-desktop2-Qt_6_2_4_for_macOS-Debug/Common/libCommon.a \
-    -F/Users/brunoboutin/Qt/6.2.4/macos/lib \
-    -framework QtQuick \
-    -framework QtQmlModels \
-    -framework QtQml \
-    -framework QtNetwork \
-    -framework QtGui \
-    -framework QtCore \
-    -framework QtWidgets
-PKG_CXXFLAGS = -std=c++17 -DQT_QUICK_LIB \
-    -F/Users/brunoboutin/Qt/6.2.4/macos/lib \
-    -DQT_QMLMODELS_LIB \
-    -DQT_QML_LIB \
-    -DQT_NETWORK_LIB \
-    -DQT_GUI_LIB \
-    -DQT_CORE_LIB \
-    -I/Users/brunoboutin/Qt/6.2.4/macos/lib/QtQuick.framework/Headers \
-    -I/Users/brunoboutin/Qt/6.2.4/macos/lib/QtQmlModels.framework/Headers \
-    -I/Users/brunoboutin/Qt/6.2.4/macos/lib/QtQml.framework/Headers \
-    -I/Users/brunoboutin/Qt/6.2.4/macos/lib/QtNetwork.framework/Headers \
-    -I/Users/brunoboutin/Qt/6.2.4/macos/lib/QtGui.framework/Headers \
-    -I/Users/brunoboutin/Qt/6.2.4/macos/lib/QtCore.framework/Headers \
-    -I/Users/brunoboutin/JASP/source/jasp-desktop2/Common \
-    -I/Users/brunoboutin/JASP/source/jasp-desktop2/QMLComponents \
-    -I/Users/brunoboutin/JASP/source/jasp-desktop2/Common/jaspColumnEncoder
+PKG_LIBS = -g -arch arm64 \
+    -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk \
+    -mmacosx-version-min=12.5 -Wl,-search_paths_first -Wl,-headerpad_max_install_names  \
+    -F/Users/brunoboutin/Qt/6.4.2/macos/lib \
+    -Wl,-rpath,/Users/brunoboutin/Qt/6.4.2/macos/lib  \
+    /Users/brunoboutin/Qt/6.4.2/macos/lib/QtQuick.framework/Versions/A/QtQuick  \
+    /Users/brunoboutin/Qt/6.4.2/macos/lib/QtQmlModels.framework/Versions/A/QtQmlModels  \
+    /Users/brunoboutin/Qt/6.4.2/macos/lib/QtQml.framework/Versions/A/QtQml  \
+    /Users/brunoboutin/Qt/6.4.2/macos/lib/QtNetwork.framework/Versions/A/QtNetwork  \
+    /Users/brunoboutin/Qt/6.4.2/macos/lib/QtOpenGL.framework/Versions/A/QtOpenGL  \
+    /Users/brunoboutin/Qt/6.4.2/macos/lib/QtGui.framework/Versions/A/QtGui  \
+    /Users/brunoboutin/Qt/6.4.2/macos/lib/QtCore.framework/Versions/A/QtCore  \
+    -framework IOKit  -framework DiskArbitration  -Xlinker -framework -Xlinker OpenGL  \
+    -Xlinker -framework -Xlinker AGL  -framework AppKit  -framework ImageIO  -framework Metal
+
+
+PKG_CXXFLAGS = -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_OPENGL_LIB -DQT_QMLINTEGRATION_LIB -DQT_QMLMODELS_LIB -DQT_QML_LIB -DQT_QUICK_LIB \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/lib/QtCore.framework/Headers \
+    -iframework /Users/brunoboutin/Qt/6.4.2/macos/lib \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/mkspecs/macx-clang \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/include \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/lib/QtQml.framework/Headers \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/include/QtQmlIntegration \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/lib/QtNetwork.framework/Headers \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/lib/QtQuick.framework/Headers \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/lib/QtGui.framework/Headers \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/lib/QtQmlModels.framework/Headers \
+    -isystem /Users/brunoboutin/Qt/6.4.2/macos/lib/QtOpenGL.framework/Headers \
+    -g -arch arm64 \
+    -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk \
+    -mmacosx-version-min=12.5 -std=gnu++17 -MD -MT
+
