@@ -142,7 +142,7 @@ void init(StringVector& output)
 // [[Rcpp::export]]
 
 
-StringVector runQml(String qmlFileName, String options)
+StringVector runQml(String qmlFileName, String options, String data)
 {
 	StringVector output;
 
@@ -151,6 +151,7 @@ StringVector runQml(String qmlFileName, String options)
 
 	std::string qmlFileNameStr = qmlFileName.get_cstring();
 	std::string optionsStr = options.get_cstring();
+	std::string dataStr = data.get_cstring();
 
 	output.push_back("File: " + qmlFileNameStr);
 
@@ -185,7 +186,8 @@ StringVector runQml(String qmlFileName, String options)
 	QString returnedValue;
 	QMetaObject::invokeMethod(item, "parseOptions",
 		Q_RETURN_ARG(QString, returnedValue),
-		Q_ARG(QString, QString::fromStdString(optionsStr)));
+		Q_ARG(QString, QString::fromStdString(optionsStr)),
+		Q_ARG(QString, QString::fromStdString(dataStr)));
 	output.push_back("OPTIONS: " + returnedValue.toStdString());
 
 	return output;

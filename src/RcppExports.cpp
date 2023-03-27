@@ -6,20 +6,21 @@
 using namespace Rcpp;
 
 // runQml
-StringVector runQml(String qmlFilePath, String options);
-RcppExport SEXP _qmlR_runQml(SEXP qmlFilePathSEXP, SEXP optionsSEXP) {
+StringVector runQml(String qmlFilePath, String options, String data);
+RcppExport SEXP _qmlR_runQml(SEXP qmlFilePathSEXP, SEXP optionsSEXP, SEXP dataSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
 	Rcpp::traits::input_parameter< String >::type qmlFilePath(qmlFilePathSEXP);
 	Rcpp::traits::input_parameter< String >::type options(optionsSEXP);
-	rcpp_result_gen = Rcpp::wrap(runQml(qmlFilePath, options));
+	Rcpp::traits::input_parameter< String >::type data(dataSEXP);
+	rcpp_result_gen = Rcpp::wrap(runQml(qmlFilePath, options, data));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-	{"_qmlR_runQml", (DL_FUNC) &_qmlR_runQml, 2},
+	{"_qmlR_runQml", (DL_FUNC) &_qmlR_runQml, 3},
     {NULL, NULL, 0}
 };
 

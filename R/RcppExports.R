@@ -3,6 +3,6 @@
 test <- function() {
     print("XXXXX")
 }
-runQml <- function(qmlFilePath, options) {
-    .Call(`_qmlR_runQml`, qmlFilePath, options)
+runQml <- function(qmlFilePath, options, data) {
+    .Call(`_qmlR_runQml`, qmlFilePath, options, data)
 }

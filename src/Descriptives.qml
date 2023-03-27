@@ -31,7 +31,7 @@ Form
 	}
 	VariablesForm
 	{
-		AvailableVariablesList	{ name: "allVariablesList"; id: allVariables	; values: ["one", "two", "three"]							}
+		AvailableVariablesList	{ name: "allVariablesList"; id: allVariables			}
 		AssignedVariablesList	{ name: "variables";		title: qsTr("Variables")	}
 		AssignedVariablesList	{ name: "splitby";			title: qsTr("Split");		singleVariable: true; suggestedColumns: ["ordinal", "nominal"];	id: splitBy }
 	}
